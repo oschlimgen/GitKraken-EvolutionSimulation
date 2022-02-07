@@ -143,6 +143,6 @@ MonoBehaviour:
   agent: {fileID: 5046587827137002024, guid: 360076c2674babf4085be6c0afa69325, type: 3}
   food: {fileID: 1617253597158802130, guid: f9abfff54a42c384d8f1b0cae96fa4a0, type: 3}
   foodCount: 50
-  creatureCount: 50
+  creatureCount: 20
   mapSize: 30
   agentBorder: 1

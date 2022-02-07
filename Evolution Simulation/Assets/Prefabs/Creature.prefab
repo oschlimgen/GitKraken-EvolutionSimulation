@@ -137,13 +137,12 @@ MonoBehaviour:
   angle: 0
   parent: {fileID: 3109176890336408349, guid: 912aa28c811a9464dbbfb1111fd2aba5, type: 3}
   deadAgent: {fileID: 4965550436468241195, guid: 8ec0a1839569af1499076ab0b98996a0, type: 3}
-  energy: 75
+  energy: 100
   speed: 0
   radius: 0
   size: 0
   caution: 1
-  FoodEaten: 0
-  TimeRemaining: 0
+  foodEaten: 0
 --- !u!54 &5720711232451352811
 Rigidbody:
   m_ObjectHideFlags: 0

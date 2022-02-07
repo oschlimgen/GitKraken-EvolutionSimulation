@@ -33,6 +33,7 @@ public class AgentController : MonoBehaviour
     private bool pause = false; //Tracks if editting
     private GameObject[] agents;
     private float[,] agentStats;
+    private float wait;
 
     public int foodEaten;
 
@@ -118,6 +119,7 @@ public class AgentController : MonoBehaviour
         visited[0].y = gameObject.transform.position.z - Mathf.Sin(angle) * radius / 2f;
         agents = TerrainGeneration.agents;
         agentStats = TerrainGeneration.agentStats;
+        wait = energy;
     }
 
     
@@ -165,20 +167,16 @@ public class AgentController : MonoBehaviour
                                 }
                             }
                         }
-                        if(closest.x == x && closest.z == z) {
+                        if(closest.x == x && closest.z == z && agentStats[ID,1] <= wait) {
                             moveSmart(gameObject.transform.position, visited, radius, agents, danger, out angle, out visited);
+                            wait = energy;
                             closest = new Vector3(gameObject.transform.position.x + Mathf.Cos(angle), 0f, gameObject.transform.position.z + Mathf.Sin(angle));
                             if(closest.x > border || closest.x < -border || closest.z > border || closest.z < -border) {
-                                angle = Mathf.Atan(gameObject.transform.position.z / gameObject.transform.position.x);
-                                if(gameObject.transform.position.x > 0f) {
-                                    angle += Mathf.PI;
-                                } else if(angle < 0f) {
-                                    angle += 2 * Mathf.PI;
-                                }
-                                closest = new Vector3(gameObject.transform.position.x + Mathf.Cos(angle), 0f, gameObject.transform.position.z + Mathf.Sin(angle));
+                                closest = parent.transform.position;
+                                wait = agentStats[ID,1] - 0.2f;
                             }
                             navigation.SetDestination(closest);
-                        } else {
+                        } else if (agentStats[ID,1] <= wait){
                             navigation.SetDestination(closest);
                         }
                     }
