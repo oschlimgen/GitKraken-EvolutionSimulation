@@ -141,7 +141,7 @@ MonoBehaviour:
   speed: 0
   radius: 0
   size: 0
-  caution: 1
+  caution: 0.5
   foodEaten: 0
 --- !u!54 &5720711232451352811
 Rigidbody:

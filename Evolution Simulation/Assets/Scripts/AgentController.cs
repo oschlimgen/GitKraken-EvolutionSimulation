@@ -17,7 +17,7 @@ public class AgentController : MonoBehaviour
     public float radius;
     public float size;
     private float timer = 0f;
-    public float caution = 1f;
+    public float caution = 0.5f;
 
     private NavMeshAgent navigation;
     private GameObject[] food;
@@ -27,7 +27,7 @@ public class AgentController : MonoBehaviour
     private float elapsed;
     private Vector2[] visited;
     private NavMeshHit edge;
-    private bool Return;
+    private bool Return = false;
     private float border;
     private float sizeDifference = 1.25f;
     private bool pause = false; //Tracks if editting
@@ -88,7 +88,7 @@ public class AgentController : MonoBehaviour
                 bigCreatureAngle += Mathf.Atan2(pos.z - creatures[index].transform.position.z, pos.x - creatures[index].transform.position.x);
             }
         }
-        finalAngle = (angle0 + angle1 + angle2) / 3f;
+        finalAngle = (2 * angle0 + angle1 + angle2) / 4f;
         if(bigCreatureCount != 0) {
             finalAngle = (finalAngle + bigCreatureAngle / bigCreatureCount) / 2f;
         }
@@ -136,11 +136,11 @@ public class AgentController : MonoBehaviour
                 x = gameObject.transform.position.x;
                 z = gameObject.transform.position.z;
                 if((x > border || x < -border || z > border || z < -border) && agentStats[ID,0] > 0f) {
+                    Debug.Log("I've eaten " + agentStats[ID,0].ToString() + " food and have " + agentStats[ID,1].ToString() + " seconds left! My ID is " + ID.ToString());
                     TerrainGeneration.agentStats[ID,1] = 0f;
                 } else {
                     NavMesh.FindClosestEdge(gameObject.transform.position, out edge, NavMesh.AllAreas);
-                    Return = false;
-                    if(agentStats[ID,0] == 1f && agentStats[ID,1] < caution * (edge.distance + 5f) / speed) {
+                    if(agentStats[ID,0] == 1f && TerrainGeneration.agentStats[ID,1] < caution * (edge.distance + 5f) / speed) {
                         Return = true;
                     }
                     if(agentStats[ID,0] == 0f || (agentStats[ID,0] == 1f && Return == false)) {
@@ -167,26 +167,23 @@ public class AgentController : MonoBehaviour
                                 }
                             }
                         }
-                        if(closest.x == x && closest.z == z && agentStats[ID,1] <= wait) {
-                            moveSmart(gameObject.transform.position, visited, radius, agents, danger, out angle, out visited);
-                            wait = energy;
-                            closest = new Vector3(gameObject.transform.position.x + Mathf.Cos(angle), 0f, gameObject.transform.position.z + Mathf.Sin(angle));
-                            if(closest.x > border || closest.x < -border || closest.z > border || closest.z < -border) {
-                                closest = parent.transform.position;
-                                wait = agentStats[ID,1] - 0.2f;
+                        if(closest.x == x && closest.z == z) {
+                            if(TerrainGeneration.agentStats[ID,1] <= wait) {
+                                moveSmart(gameObject.transform.position, visited, radius, agents, danger, out angle, out visited);
+                                wait = energy;
+                                closest = new Vector3(gameObject.transform.position.x + Mathf.Cos(angle), 0f, gameObject.transform.position.z + Mathf.Sin(angle));
+                                if(closest.x > border || closest.x < -border || closest.z > border || closest.z < -border) {
+                                    closest = parent.transform.position;
+                                    wait = TerrainGeneration.agentStats[ID,1] - 0.5f;
+                                }
+                                navigation.SetDestination(closest);
                             }
-                            navigation.SetDestination(closest);
-                        } else if (agentStats[ID,1] <= wait){
+                        } else {
                             navigation.SetDestination(closest);
                         }
                     }
-                    if(TerrainGeneration.agentStats[ID,0] >= 2 || Return == true) {
-                        if(Mathf.Abs(gameObject.transform.position.x - edge.position.x) < 0.25f && Mathf.Abs(gameObject.transform.position.z - edge.position.z) < 0.25f) {
-                            TerrainGeneration.agentStats[ID,1] = 0f;
-                            navigation.SetDestination(gameObject.transform.position);
-                        } else {
-                            navigation.SetDestination(edge.position);
-                        }
+                    if(agentStats[ID,0] >= 2 || Return == true) {
+                        navigation.SetDestination(edge.position);
                     }
                 }
                 timer = 0f;
@@ -199,20 +196,20 @@ public class AgentController : MonoBehaviour
                     navigation.SetDestination(gameObject.transform.position);
                     if(transform.localPosition.x >= border) {
                         angle = Mathf.PI;
-                    }
-                    if(transform.localPosition.x <= -border) {
+                    } else if(transform.localPosition.x <= -border) {
                         angle = 0f;
-                    }
-                    if(transform.localPosition.z >= border) {
+                    } else if(transform.localPosition.z >= border) {
                         angle = (3f / 2f) * Mathf.PI;
-                    }
-                    if(transform.localPosition.z <= -border) {
+                    } else if(transform.localPosition.z <= -border) {
                         angle = (1f / 2f) * Mathf.PI;
+                    } else {
+                        Debug.Log("I didn't make it home. I ate " + agentStats[ID,0].ToString() + " food. My ID is " + ID.ToString());
                     }
                     visited = new Vector2[1];
                     visited[0].x = gameObject.transform.position.x - Mathf.Cos(angle) * radius / 2f;
                     visited[0].y = gameObject.transform.position.z - Mathf.Sin(angle) * radius / 2f;
                     timer = 0f;
+                    Return = false;
                     TerrainGeneration.startRound[ID] = false;
                     pause = true;
                 }
